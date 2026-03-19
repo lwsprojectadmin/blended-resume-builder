@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ResumeForge – ATS Resume Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #0d0d0d;
+    --paper:     #f5f2ec;
+    --cream:     #ede9e0;
+    --gold:      #c8a96e;
+    --gold-light:#e8d5a8;
+    --rust:      #b84a2f;
+    --slate:     #3a3a4a;
+    --muted:     #7a7a8a;
+    --border:    #d4cfc4;
+    --success:   #2a7a4f;
+    --error:     #b84a2f;
+    --card-bg:   #faf8f4;
+    --shadow:    0 2px 24px rgba(13,13,13,0.08), 0 1px 4px rgba(13,13,13,0.04);
+    --shadow-lg: 0 8px 48px rgba(13,13,13,0.12), 0 2px 8px rgba(13,13,13,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 0%, rgba(200,169,110,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(184,74,47,0.07) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    margin-bottom: 52px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .logo-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .logo-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--ink);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 22px; height: 22px; fill: var(--gold); }
+
+  .logo-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.4rem, 6vw, 3.6rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 400;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── STEP INDICATOR ── */
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 40px;
+    animation: fadeDown 0.7s 0.1s ease both;
+  }
+
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+  }
+
+  .step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: calc(50% + 16px);
+    width: calc(100% - 8px);
+    height: 1px;
+    background: var(--border);
+  }
+
+  .step-item.done:not(:last-child)::after { background: var(--gold); }
+
+  .step-bubble {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-item.active .step-bubble {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--gold);
+  }
+
+  .step-item.done .step-bubble {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+  }
+
+  .step-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--muted);
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .step-item.active .step-label { color: var(--ink); }
+  .step-item.done .step-label { color: var(--gold); }
+
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(3, 160px);
+    gap: 0;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: fadeUp 0.7s 0.15s ease both;
+  }
+
+  .card-section {
+    padding: 36px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-section:last-child { border-bottom: none; }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .section-num {
+    width: 26px;
+    height: 26px;
+    background: var(--ink);
+    color: var(--gold);
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .section-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ── FORM GRID ── */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .field-row.single { grid-template-columns: 1fr; }
+  .field-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  label .req {
+    color: var(--rust);
+    margin-left: 2px;
+  }
+
+  label .opt {
+    color: var(--muted);
+    font-weight: 400;
+    text-transform: none;
+    font-size: 0.72rem;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--ink);
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder, textarea::placeholder { color: #b0aba0; }
+
+  input:focus, textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(200,169,110,0.15);
+  }
+
+  input.error, textarea.error {
+    border-color: var(--rust);
+    box-shadow: 0 0 0 3px rgba(184,74,47,0.1);
+  }
+
+  .field-hint {
+    font-size: 0.73rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .field-error {
+    font-size: 0.73rem;
+    color: var(--rust);
+    font-weight: 500;
+    display: none;
+  }
+
+  .field-error.show { display: block; }
+
+  textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
+  textarea.tall { min-height: 180px; }
+
+  /* ── TOGGLE SWITCH (resume upload option) ── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .toggle-row:hover { border-color: var(--gold); }
+
+  .toggle-info { flex: 1; }
+
+  .toggle-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toggle-label svg { color: var(--gold); flex-shrink: 0; }
+
+  .toggle-sub {
+    font-size: 0.76rem;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  .toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.25s;
+    flex-shrink: 0;
+    margin-left: 16px;
+    cursor: pointer;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  .toggle-switch.on { background: var(--gold); }
+  .toggle-switch.on::after { transform: translateX(20px); }
+
+  .resume-paste-area {
+    display: none;
+    animation: fadeDown 0.3s ease;
+  }
+
+  .resume-paste-area.show { display: block; }
+
+  /* ── WEBHOOK URL ── */
+  .webhook-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .webhook-row input { flex: 1; }
+
+  .btn-test {
+    padding: 11px 18px;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--slate);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-test:hover { border-color: var(--gold); color: var(--ink); background: white; }
+
+  /* ── SUBMIT BUTTON ── */
+  .submit-wrap {
+    padding: 32px 40px;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .submit-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 320px;
+  }
+
+  .submit-meta strong { color: var(--slate); }
+
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: var(--ink);
+    color: var(--gold);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: -0.01em;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .btn-submit::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(200,169,110,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-submit:hover::before { opacity: 1; }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-submit svg { width: 18px; height: 18px; transition: transform 0.2s; }
+  .btn-submit:hover svg { transform: translateX(3px); }
+
+  /* ── LOADER ── */
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(200,169,110,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .btn-submit.loading .spinner { display: block; }
+  .btn-submit.loading .btn-arrow { display: none; }
+
+  /* ── SUCCESS / ERROR STATES ── */
+  .result-banner {
+    display: none;
+    padding: 20px 28px;
+    border-radius: 14px;
+    margin-top: 24px;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .result-banner.success {
+    display: flex;
+    gap: 14px;
+    background: #edf7f2;
+    border: 1.5px solid #a8d9be;
+  }
+
+  .result-banner.error-state {
+    display: flex;
+    gap: 14px;
+    background: #fdf0ed;
+    border: 1.5px solid #e8a898;
+  }
+
+  .result-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .result-banner.success .result-icon { background: #a8d9be; }
+  .result-banner.error-state .result-icon { background: #e8a898; }
+
+  .result-text h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .result-banner.success .result-text h3 { color: var(--success); }
+  .result-banner.error-state .result-text h3 { color: var(--rust); }
+
+  .result-text p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── CHAR COUNTER ── */
+  .char-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .char-count {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── BADGE ── */
+  .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge-blend { background: rgba(200,169,110,0.18); color: #8a6a2a; }
+  .badge-scratch { background: rgba(58,58,74,0.1); color: var(--slate); }
+
+  /* ── WEBHOOK CONFIG BOX ── */
+  .config-box {
+    background: var(--ink);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+
+  .config-box-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .config-box .field label { color: rgba(245,242,236,0.6); }
+  .config-box input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: var(--paper); }
+  .config-box input::placeholder { color: rgba(245,242,236,0.3); }
+  .config-box input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(200,169,110,0.2); }
+  .config-box .btn-test { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: var(--paper); }
+  .config-box .btn-test:hover { background: rgba(255,255,255,0.14); border-color: var(--gold); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .page-wrap { padding: 28px 16px 60px; }
+    .card-section { padding: 24px 20px; }
+    .submit-wrap { padding: 24px 20px; flex-direction: column; align-items: stretch; }
+    .field-row { grid-template-columns: 1fr; }
+    .field-row.triple { grid-template-columns: 1fr; }
+    h1 { font-size: 2.2rem; }
+    .steps-row { grid-template-columns: repeat(3, 120px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h4v1.5H8V10z"/>
+        </svg>
+      </div>
+      <span class="logo-name">ResumeForge</span>
+    </div>
+    <h1>Build your <em>ATS-ready</em><br>resume in minutes</h1>
+    <p class="subtitle">Paste a job description, share your details, and receive a professionally crafted resume optimised for applicant tracking systems.</p>
+  </header>
+
+  <!-- STEP INDICATOR -->
+  <div class="steps">
+    <div class="steps-row">
+      <div class="step-item active" id="step1">
+        <div class="step-bubble">1</div>
+        <span class="step-label">Your Info</span>
+      </div>
+      <div class="step-item" id="step2">
+        <div class="step-bubble">2</div>
+        <span class="step-label">Job Details</span>
+      </div>
+      <div class="step-item" id="step3">
+        <div class="step-bubble">3</div>
+        <span class="step-label">Generate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card" id="mainCard">
+
+    <!-- SECTION 0: WEBHOOK CONFIG -->
+    <div class="card-section">
+      <div class="config-box">
+        <div class="config-box-title">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V15a1 1 0 0 0-2 0v1.93A8 8 0 0 1 4.07 11H6a1 1 0 0 0 0-2H4.07A8 8 0 0 1 11 4.07V6a1 1 0 0 0 2 0V4.07A8 8 0 0 1 19.93 11H18a1 1 0 0 0 0 2h1.93A8 8 0 0 1 13 16.93z"/></svg>
+          n8n Webhook Configuration
+        </div>
+        <div class="field">
+          <label>Webhook URL <span class="req">*</span></label>
+          <div class="webhook-row">
+            <input type="url" id="webhookUrl" placeholder="https://your-n8n-instance.com/webhook/resume-intake" autocomplete="off">
+            <button class="btn-test" onclick="testWebhook()">Ping</button>
+          </div>
+          <span class="field-hint">Your n8n webhook endpoint — copy from the Webhook node trigger URL in your workflow.</span>
+          <span class="field-error" id="webhookErr">Please enter a valid webhook URL.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 1: CANDIDATE INFO -->
+    <div class="card-section">
+      <div class="section-label">
+        <div class="section-num">01</div>
+        <div>
+          <div class="section-title">Candidate Information</div>
+          <div class="section-desc">Your basic contact details for the resume header</div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="name">Full Name <span class="req">*</span></label>
+          <input type="text" id="name" name="name" placeholder="Alexandra Morgan" autocomplete="name">
+          <span class="field-error" id="nameErr">Please enter your full name.</span>
+        </div>
+        <div class="field">
+          <label for="phone">Phone Number <span class="req">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="+1 (555) 000-0000" autocomplete="tel">
+          <span class="field-error" id="phoneErr">Please enter a phone number.</span>
+        </div>
+      </div>
+
+      <div class="field-row single">
+        <div class="field">
+          <label for="email">Email Address <span class="req">*</span></label>
+          <input type="email" id="email" name="email" placeholder="alex@example.com" autocomplete="email">
+          <span class="field-hint">Your finished resume will be delivered to this address.</span>
+          <span class="field-error" id="emailErr">Please enter a valid email address.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: JOB DESCRIPTION -->
+    <div class="card-section">
+      <div class="section-label">
+        <div class="section-num">02</div>
+        <div>
+          <div class="section-title">Target Job Description</div>
+          <div class="section-desc">Paste the full job posting — the AI extracts every keyword and requirement</div>
+        </div>
+      </div>
+
+      <div class="field-row single">
+        <div class="field">
+          <div class="char-row">
+            <label for="jobDescription">Job Description <span class="req">*</span></label>
+            <span class="char-count" id="jdCount">0 chars</span>
+          </div>
+          <textarea id="jobDescription" name="jobDescription" class="tall"
+            placeholder="Paste the complete job description here, including responsibilities, required qualifications, preferred skills, and any keywords that appear in the posting..."></textarea>
+          <span class="field-hint">Longer descriptions give the AI more keywords to optimise against — paste the whole thing.</span>
+          <span class="field-error" id="jdErr">Please paste the job description (at least 100 characters).</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: EXISTING RESUME (OPTIONAL) -->
+    <div class="card-section">
+      <div class="section-label">
+        <div class="section-num">03</div>
+        <div>
+          <div class="section-title">Existing Resume <span style="font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:400;color:var(--muted);margin-left:8px;">Optional</span></div>
+          <div class="section-desc">Provide your current resume to blend real experience with new JD keywords</div>
+        </div>
+        <div style="margin-left:auto;">
+          <span class="mode-badge" id="modeBadge" style="display:none"></span>
+        </div>
+      </div>
+
+      <!-- TOGGLE -->
+      <div class="toggle-row" onclick="toggleResume()" id="toggleRow">
+        <div class="toggle-info">
+          <div class="toggle-label">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            I have an existing resume to blend
+          </div>
+          <div class="toggle-sub">Enables <strong>Blend Mode</strong> — your real experience is rewritten to match the target role.</div>
+        </div>
+        <div class="toggle-switch" id="toggleSwitch"></div>
+      </div>
+
+      <!-- RESUME PASTE AREA (hidden until toggle) -->
+      <div class="resume-paste-area" id="resumePaste">
+        <div class="field">
+          <div class="char-row">
+            <label for="currentResume">Current Resume <span class="opt">— plain text paste</span></label>
+            <span class="char-count" id="resumeCount">0 chars</span>
+          </div>
+          <textarea id="currentResume" name="currentResume" class="tall"
+            placeholder="Paste your current resume as plain text here — include work history, skills, education, and any certifications. The AI will preserve factual details and rewrite language to match the job description..."></textarea>
+          <span class="field-hint">No PDF needed — just copy-paste the text. Open your existing resume, select all, and paste here.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-wrap">
+      <div class="submit-meta">
+        <strong>What happens next?</strong><br>
+        The AI analyses the job description, optimises your resume for ATS systems, and emails the finished HTML file to your address. Open in Chrome → Print → Save as PDF.
+      </div>
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+        <div class="spinner"></div>
+        <span>Generate My Resume</span>
+        <svg class="btn-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- RESULT BANNERS -->
+  <div class="result-banner" id="successBanner">
+    <div class="result-icon">
+      <svg width="18" height="18" fill="none" stroke="#2a7a4f" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <div class="result-text">
+      <h3>Resume sent successfully!</h3>
+      <p id="successMsg">Your ATS-optimised resume has been generated and emailed. Check your inbox — it usually arrives within a minute.</p>
+    </div>
+  </div>
+
+  <div class="result-banner" id="errorBanner">
+    <div class="result-icon">
+      <svg width="18" height="18" fill="none" stroke="#b84a2f" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+    </div>
+    <div class="result-text">
+      <h3>Something went wrong</h3>
+      <p id="errorMsg">Could not reach the webhook. Check your n8n URL and try again.</p>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+  /* ── STATE ── */
+  let resumeEnabled = false;
+
+  /* ── TOGGLE EXISTING RESUME ── */
+  function toggleResume() {
+    resumeEnabled = !resumeEnabled;
+    const sw    = document.getElementById('toggleSwitch');
+    const paste = document.getElementById('resumePaste');
+    const badge = document.getElementById('modeBadge');
+
+    sw.classList.toggle('on', resumeEnabled);
+    paste.classList.toggle('show', resumeEnabled);
+
+    if (resumeEnabled) {
+      badge.className = 'mode-badge badge-blend';
+      badge.innerHTML = '⟳ Blend Mode';
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.className = 'mode-badge badge-scratch';
+      badge.innerHTML = '✦ Scratch Mode';
+      badge.style.display = 'none';
+    }
+
+    updateStepIndicator();
+  }
+
+  /* ── CHAR COUNTERS ── */
+  document.getElementById('jobDescription').addEventListener('input', function() {
+    document.getElementById('jdCount').textContent = this.value.length.toLocaleString() + ' chars';
+  });
+
+  document.getElementById('currentResume').addEventListener('input', function() {
+    document.getElementById('resumeCount').textContent = this.value.length.toLocaleString() + ' chars';
+  });
+
+  /* ── LIVE STEP INDICATOR UPDATE ── */
+  function updateStepIndicator() {
+    const name  = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const jd    = document.getElementById('jobDescription').value.trim();
+
+    const s1Done = name && email && phone;
+    const s2Done = s1Done && jd.length >= 100;
+
+    setStep(1, s1Done ? 'done' : 'active');
+    setStep(2, s2Done ? 'done' : (s1Done ? 'active' : ''));
+    setStep(3, s2Done ? 'active' : '');
+  }
+
+  function setStep(n, state) {
+    const el = document.getElementById('step' + n);
+    el.classList.remove('active', 'done');
+    if (state) el.classList.add(state);
+    if (state === 'done') {
+      el.querySelector('.step-bubble').innerHTML = '✓';
+    } else {
+      el.querySelector('.step-bubble').textContent = n;
+    }
+  }
+
+  ['name','email','phone','jobDescription'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateStepIndicator);
+  });
+
+  /* ── VALIDATION ── */
+  function validate() {
+    let ok = true;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const fields = [
+      { id: 'webhookUrl', errId: 'webhookErr', check: v => v.startsWith('http'), msg: 'Please enter a valid webhook URL.' },
+      { id: 'name',       errId: 'nameErr',    check: v => v.length >= 2,        msg: 'Please enter your full name.' },
+      { id: 'phone',      errId: 'phoneErr',   check: v => v.length >= 5,        msg: 'Please enter a phone number.' },
+      { id: 'email',      errId: 'emailErr',   check: v => emailRe.test(v),      msg: 'Please enter a valid email address.' },
+      { id: 'jobDescription', errId: 'jdErr',  check: v => v.length >= 100,      msg: 'Please paste the job description (at least 100 characters).' }
+    ];
+
+    fields.forEach(({ id, errId, check }) => {
+      const input = document.getElementById(id);
+      const err   = document.getElementById(errId);
+      const val   = input.value.trim();
+      if (!check(val)) {
+        input.classList.add('error');
+        err.classList.add('show');
+        ok = false;
+      } else {
+        input.classList.remove('error');
+        err.classList.remove('show');
+      }
+    });
+
+    return ok;
+  }
+
+  /* clear error on type */
+  document.querySelectorAll('input, textarea').forEach(el => {
+    el.addEventListener('input', () => {
+      el.classList.remove('error');
+      const errEl = document.getElementById(el.id + 'Err');
+      if (errEl) errEl.classList.remove('show');
+    });
+  });
+
+  /* ── PING TEST ── */
+  async function testWebhook() {
+    const url = document.getElementById('webhookUrl').value.trim();
+    if (!url) { alert('Please enter the webhook URL first.'); return; }
+    try {
+      await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+      alert('✅ Webhook URL is reachable! (HEAD ping sent — check n8n for the execution log)');
+    } catch {
+      alert('⚠️ Could not reach that URL. Make sure your n8n workflow is active and the URL is correct.');
+    }
+  }
+
+  /* ── SUBMIT ── */
+  async function submitForm() {
+    if (!validate()) {
+      document.querySelector('.field.error, input.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    document.getElementById('successBanner').classList.remove('success');
+    document.getElementById('errorBanner').classList.remove('error-state');
+    document.getElementById('successBanner').style.display = 'none';
+    document.getElementById('errorBanner').style.display = 'none';
+
+    const webhookUrl = document.getElementById('webhookUrl').value.trim();
+
+    const payload = {
+      name:           document.getElementById('name').value.trim(),
+      email:          document.getElementById('email').value.trim(),
+      phone:          document.getElementById('phone').value.trim(),
+      jobDescription: document.getElementById('jobDescription').value.trim(),
+      currentResume:  resumeEnabled ? document.getElementById('currentResume').value.trim() : null
+    };
+
+    try {
+      const res = await fetch(webhookUrl, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        let data = {};
+        try { data = await res.json(); } catch {}
+
+        const score   = data.atsMatchScore ? ` Estimated ATS match score: ${data.atsMatchScore}%.` : '';
+        const mode    = data.mode === 'blended' ? 'Blend mode used — your existing experience was rewritten to match the role.' : 'Template resume generated from the job description.';
+        const email   = payload.email;
+
+        document.getElementById('successMsg').textContent =
+          `Your resume has been sent to ${email}. ${mode}${score} Check your inbox — it usually arrives within a minute.`;
+
+        document.getElementById('successBanner').classList.add('success');
+        document.getElementById('successBanner').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Reset step indicators
+        setStep(3, 'done');
+      } else {
+        throw new Error(`Server responded with ${res.status}`);
+      }
+
+    } catch (err) {
+      document.getElementById('errorMsg').textContent =
+        `Could not reach the webhook: ${err.message}. Make sure your n8n workflow is active and the URL is correct.`;
+      document.getElementById('errorBanner').classList.add('error-state');
+      document.getElementById('errorBanner').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+
+  /* ── KEYBOARD SHORTCUT ── */
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') submitForm();
+  });
+</script>
+</body>
+</html>
